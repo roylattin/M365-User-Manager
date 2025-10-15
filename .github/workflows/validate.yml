@@ -1,0 +1,88 @@
+name: PowerShell Script Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-powershell:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Validate PowerShell Syntax
+      shell: powershell
+      run: |
+        Write-Host "Validating PowerShell scripts..." -ForegroundColor Green
+        
+        $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Recurse
+        $errors = 0
+        
+        foreach ($script in $scripts) {
+          Write-Host "Checking: $($script.Name)" -ForegroundColor Cyan
+          
+          try {
+            $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $script.FullName -Raw), [ref]$null)
+            Write-Host "  ✓ Syntax OK" -ForegroundColor Green
+          }
+          catch {
+            Write-Host "  ✗ Syntax Error: $($_.Exception.Message)" -ForegroundColor Red
+            $errors++
+          }
+        }
+        
+        if ($errors -gt 0) {
+          Write-Host "Found $errors syntax errors" -ForegroundColor Red
+          exit 1
+        } else {
+          Write-Host "All scripts passed syntax validation" -ForegroundColor Green
+        }
+    
+    - name: Test Module Imports
+      shell: powershell
+      run: |
+        Write-Host "Testing module availability..." -ForegroundColor Green
+        
+        try {
+          # Test if Microsoft Graph module is available
+          if (Get-Module -ListAvailable -Name Microsoft.Graph) {
+            Write-Host "✓ Microsoft.Graph module available" -ForegroundColor Green
+          } else {
+            Write-Host "! Microsoft.Graph module not available (expected in CI)" -ForegroundColor Yellow
+          }
+        }
+        catch {
+          Write-Host "Module test failed: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    
+    - name: Validate JSON Configuration Files
+      shell: powershell
+      run: |
+        Write-Host "Validating JSON configuration files..." -ForegroundColor Green
+        
+        $jsonFiles = Get-ChildItem -Path . -Filter "*.json" -Recurse
+        $errors = 0
+        
+        foreach ($file in $jsonFiles) {
+          Write-Host "Checking: $($file.Name)" -ForegroundColor Cyan
+          
+          try {
+            $content = Get-Content $file.FullName -Raw
+            $null = ConvertFrom-Json $content
+            Write-Host "  ✓ Valid JSON" -ForegroundColor Green
+          }
+          catch {
+            Write-Host "  ✗ Invalid JSON: $($_.Exception.Message)" -ForegroundColor Red
+            $errors++
+          }
+        }
+        
+        if ($errors -gt 0) {
+          Write-Host "Found $errors JSON validation errors" -ForegroundColor Red
+          exit 1
+        } else {
+          Write-Host "All JSON files are valid" -ForegroundColor Green
+        }

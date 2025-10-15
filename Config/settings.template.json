@@ -1,0 +1,10 @@
+{
+  "tenant": {
+    "tenantId": "your-tenant-id-here",
+    "domain": "yourdomain.onmicrosoft.com"
+  },
+  "licensing": {
+    "m365E5Sku": "Microsoft_365_E5_(no_Teams)",
+    "copilotSku": "Microsoft_365_Copilot"
+  }
+}

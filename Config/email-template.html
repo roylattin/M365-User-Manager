@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the Organization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #e1e5e9;
+        }
+        .credentials {
+            background-color: #fff;
+            border: 2px solid #0078d4;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .credential-item {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f1f3f4;
+            border-radius: 4px;
+        }
+        .important {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to the Organization!</h1>
+        <p>Your new Microsoft 365 account has been created</p>
+    </div>
+    
+    <div class="content">
+        <p>Hello <strong>{{FirstName}} {{LastName}}</strong>,</p>
+        
+        <p>Welcome to our organization! Your new Microsoft 365 account has been successfully created and configured. Below are your login credentials and important information about your new account.</p>
+        
+        <div class="credentials">
+            <h3>Your Account Details</h3>
+            <div class="credential-item">
+                <strong>Username:</strong> {{Username}}
+            </div>
+            <div class="credential-item">
+                <strong>Temporary Password:</strong> {{Password}}
+            </div>
+            <div class="credential-item">
+                <strong>Email Address:</strong> {{EmailAddress}}
+            </div>
+            <div class="credential-item">
+                <strong>Department:</strong> {{Department}}
+            </div>
+        </div>
+        
+        <div class="important">
+            <h4>🔒 Important Security Information</h4>
+            <ul>
+                <li>You will be required to change your password on first login</li>
+                <li>Your account includes Microsoft 365 E5 license with Copilot</li>
+                <li>Your Exchange mailbox is ready and configured</li>
+                <li>Please keep this information secure and do not share your credentials</li>
+            </ul>
+        </div>
+        
+        <h3>Getting Started</h3>
+        <ol>
+            <li>Go to <a href="https://portal.office.com">https://portal.office.com</a></li>
+            <li>Sign in with your username and temporary password</li>
+            <li>Follow the prompts to set up your new password</li>
+            <li>Set up multi-factor authentication when prompted</li>
+            <li>Explore your new Microsoft 365 applications including Copilot</li>
+        </ol>
+        
+        <p>If you have any questions or need assistance, please contact the IT Help Desk.</p>
+        
+        <p>Best regards,<br>
+        IT Administration Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>Generated on {{Date}} at {{Time}}</p>
+    </div>
+</body>
+</html>

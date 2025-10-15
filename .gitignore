@@ -1,0 +1,32 @@
+# Logs
+Logs/*.log
+
+# Configuration files with sensitive data
+Config/settings.json
+
+# PowerShell module cache
+*.pdb
+*.dll
+*.exe
+
+# Temporary files
+*.tmp
+*.temp
+
+# User-specific files
+.vscode/
+*.code-workspace
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# MacOS
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+
+# PowerShell execution policies
+execution.policies
