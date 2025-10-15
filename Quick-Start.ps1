@@ -20,8 +20,8 @@ function Write-QuickLog {
 }
 
 try {
-    Write-QuickLog "🚀 M365 Copilot User Management - Quick Start" -Level "TITLE"
-    Write-QuickLog "=" * 60 -Level "TITLE"
+    Write-QuickLog "M365 Copilot User Management - Quick Start" -Level "TITLE"
+    Write-QuickLog "============================================================" -Level "TITLE"
     Write-QuickLog ""
     
     # Step 1: Environment Setup
@@ -31,17 +31,17 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Environment setup failed"
         }
-        Write-QuickLog "✓ Environment setup completed" -Level "SUCCESS"
+        Write-QuickLog "Environment setup completed" -Level "SUCCESS"
         Write-QuickLog ""
     }
     
     # Step 2: Configuration
     Write-QuickLog "Step 2: Configuring tenant settings..." -Level "SUCCESS"
-    & ".\Setup-Configuration.ps1" -Quiet:$Quiet
+    & ".\Setup-Configuration-Simple.ps1" -Quiet:$Quiet
     if ($LASTEXITCODE -ne 0) {
         throw "Configuration setup failed"
     }
-    Write-QuickLog "✓ Configuration completed" -Level "SUCCESS"
+    Write-QuickLog "Configuration completed" -Level "SUCCESS"
     Write-QuickLog ""
     
     # Step 3: Launch Application

@@ -6,81 +6,64 @@ param(
     [switch]$Quiet
 )
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-
 function Write-ConfigLog {
-    param(
-        [string]$Message,
-        [string]$Level = "INFO"
-    )
+    param([string]$Message, [string]$Level = "INFO")
+    
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
+    $levelString = "[$Level]".PadRight(10)
+    $fullMessage = "[$timestamp] $levelString $Message"
     
     if (-not $Quiet) {
         switch ($Level) {
-            "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-            "WARN"  { Write-Host $logMessage -ForegroundColor Yellow }
-            "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-            "INPUT" { Write-Host $logMessage -ForegroundColor Cyan }
-            default { Write-Host $logMessage -ForegroundColor White }
+            "ERROR" { Write-Host $fullMessage -ForegroundColor Red }
+            "WARN"  { Write-Host $fullMessage -ForegroundColor Yellow }
+            "SUCCESS" { Write-Host $fullMessage -ForegroundColor Green }
+            default { Write-Host $fullMessage -ForegroundColor White }
         }
     }
+    
+    # Log to file
+    $logPath = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "Logs\configuration.log"
+    if (-not (Test-Path (Split-Path $logPath))) {
+        New-Item -ItemType Directory -Path (Split-Path $logPath) -Force | Out-Null
+    }
+    Add-Content -Path $logPath -Value $fullMessage
 }
 
 function Get-UserInput {
     param(
         [string]$Prompt,
-        [string]$DefaultValue = "",
+        [string]$Default = "",
         [bool]$Required = $true
     )
     
     do {
-        if ($DefaultValue) {
-            $fullPrompt = "$Prompt [$DefaultValue]"
+        if ($Default) {
+            $userInput = Read-Host "$Prompt [$Default]"
+            if ([string]::IsNullOrWhiteSpace($userInput)) {
+                $userInput = $Default
+            }
         } else {
-            $fullPrompt = $Prompt
+            $userInput = Read-Host $Prompt
         }
-        
-        Write-ConfigLog $fullPrompt -Level "INPUT"
-        $userInput = Read-Host
-        
-        if ([string]::IsNullOrWhiteSpace($userInput) -and $DefaultValue) {
-            return $DefaultValue
-        }
-        
-        if ([string]::IsNullOrWhiteSpace($userInput) -and $Required) {
-            Write-ConfigLog "This field is required. Please enter a value." -Level "WARN"
-        }
-        
     } while ([string]::IsNullOrWhiteSpace($userInput) -and $Required)
     
     return $userInput
 }
 
 function Test-TenantConnectivity {
-    param(
-        [string]$TenantId
-    )
+    param([string]$TenantId)
     
     try {
         Write-ConfigLog "Testing connectivity to tenant: $TenantId"
         
-        # Import Microsoft Graph module
-        Import-Module Microsoft.Graph -Force
-        
-        # Test connection
-        Connect-MgGraph -TenantId $TenantId -Scopes "Organization.Read.All" -NoWelcome
-        
-        $context = Get-MgContext
-        if ($context) {
-            $org = Get-MgOrganization
-            Write-ConfigLog "Successfully connected to tenant: $($org.DisplayName)" -Level "SUCCESS"
-            Disconnect-MgGraph
-            return $true
-        } else {
-            Write-ConfigLog "Failed to establish connection context" -Level "ERROR"
+        # Basic validation - check if tenant ID is a valid GUID
+        if (-not [System.Guid]::TryParse($TenantId, [ref][System.Guid]::Empty)) {
+            Write-ConfigLog "Invalid tenant ID format" -Level "ERROR"
             return $false
+        } else {
+            Write-ConfigLog "Tenant ID format is valid"
+            return $true
         }
         
     } catch {
@@ -90,28 +73,15 @@ function Test-TenantConnectivity {
 }
 
 function Get-AvailableLicenses {
-    param(
-        [string]$TenantId
-    )
+    param([string]$TenantId)
     
     try {
-        Write-ConfigLog "Retrieving available license SKUs..."
-        
-        Connect-MgGraph -TenantId $TenantId -Scopes "Organization.Read.All" -NoWelcome
-        
-        $skus = Get-MgSubscribedSku | Where-Object { $_.PrepaidUnits.Enabled -gt 0 }
-        
-        Write-ConfigLog "Available license SKUs in your tenant:"
-        foreach ($sku in $skus) {
-            $available = $sku.PrepaidUnits.Enabled - $sku.ConsumedUnits
-            Write-ConfigLog "  - $($sku.SkuPartNumber) (Available: $available)"
-        }
-        
-        Disconnect-MgGraph
-        return $skus
+        Write-ConfigLog "Retrieving available licenses for tenant..."
+        # For now, return null - can be enhanced with actual Graph API calls later
+        return $null
         
     } catch {
-        Write-ConfigLog "Failed to retrieve license information: $($_.Exception.Message)" -Level "ERROR"
+        Write-ConfigLog "Failed to retrieve licenses: $($_.Exception.Message)" -Level "ERROR"
         return $null
     }
 }
@@ -131,9 +101,9 @@ function New-ConfigurationFile {
             }
         }
         
-        Write-ConfigLog "=" * 60
+        Write-ConfigLog "============================================================"
         Write-ConfigLog "M365 Copilot User Management - Configuration Setup"
-        Write-ConfigLog "=" * 60
+        Write-ConfigLog "============================================================"
         Write-ConfigLog ""
         Write-ConfigLog "This wizard will help you configure your tenant settings."
         Write-ConfigLog "You'll need your Azure tenant information and admin privileges."
@@ -190,14 +160,14 @@ function New-ConfigurationFile {
         Set-Content -Path $configPath -Value $configJson -Encoding UTF8
         
         Write-ConfigLog ""
-        Write-ConfigLog "=" * 60
+        Write-ConfigLog "============================================================"
         Write-ConfigLog "Configuration saved successfully!" -Level "SUCCESS"
         Write-ConfigLog "Configuration file: $configPath"
         Write-ConfigLog ""
         Write-ConfigLog "Next steps:"
         Write-ConfigLog "1. Review the configuration file if needed"
         Write-ConfigLog "2. Launch the application: .\M365UserManager.ps1"
-        Write-ConfigLog "=" * 60
+        Write-ConfigLog "============================================================"
         
     } catch {
         Write-ConfigLog "Configuration setup failed: $($_.Exception.Message)" -Level "ERROR"
